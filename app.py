@@ -1,3 +1,4 @@
+from typing import Sequence
 from langchain_text_splitters import TextSplitter
 import streamlit as st
 import pandas as pd
@@ -32,13 +33,17 @@ main_config.read(config_file_path)
 #Process Code Repo 
 def process_code_repo(main_config,db_option,repo_path,groq_api_key,selected_model, rag_path_ext,query):
     if db_option == "Qdrant":
-        # LOAD
-        obj_loaders = GenericLoaders(main_config,repo_path, rag_path_ext)
-        documents = obj_loaders.loaders()
+        # # LOAD
+        # obj_loaders = GenericLoaders(main_config,repo_path, rag_path_ext)
+        # documents = obj_loaders.loaders()
 
-        # TRANSFORM
-        obj_code_splitters = CodeSplitters(main_config,repo_path,rag_path_ext)
-        docs = obj_code_splitters.code_splitters(documents)
+        # # TRANSFORM
+        # obj_code_splitters = CodeSplitters(main_config,repo_path,rag_path_ext)
+        # docs = obj_code_splitters.code_splitters(documents)
+        
+        #LOAD and SPLIT
+        obj_loaders_splitter = GenericLoaders(main_config,repo_path, rag_path_ext)
+        docs = obj_loaders_splitter.code_loader_and_splitters()
 
         #EMBEDDINGS and stored into VDB
         obj_qdr = QdrantVDB(main_config,repo_path,groq_api_key,selected_model, rag_path_ext,query)
@@ -133,17 +138,29 @@ db_option = st.sidebar.selectbox("Select Vector DB:", ["Qdrant", "Chroma"])
 st.sidebar.header("RAG Document Format")
 file_format = st.sidebar.selectbox("Select Input Document Format:", ["Code Repo", "PDF", "CSV"])
 
+# Check if the section exists
+if not main_config.has_section('Supported_Extensions'):
+    raise ValueError("Section 'Supported_Extensions' not found in config.ini")
+
+# Extract extensions from the config dictionary
+extensions =  main_config['Supported_Extensions']['extensions']
+supported_extensions = eval(extensions)
+accepted_types = [f"{ext}" for ext in supported_extensions]
+
+# Print the list of extensions
+print(accepted_types)
 
 if file_format == "Code Repo":
-    st.sidebar.header("Select Language")
-    lang_options = ["java", "python", "csharp"]  # Replace with your actual models
-    selected_lang = st.sidebar.selectbox("Select Model:", lang_options)
-    if selected_lang == "java":
-        rag_path_ext = ".java"
-    elif selected_lang == "python":
-        rag_path_ext = ".py"
-    elif selected_lang == "csharp":
-        rag_path_ext = ".cs"
+    # st.sidebar.header("Select Language")
+    # lang_options = ["java", "python", "csharp"]  # Replace with your actual models
+    # selected_lang = st.sidebar.selectbox("Select Model:", lang_options)
+    # if selected_lang == "java":
+    #     rag_path_ext = ".java"
+    # elif selected_lang == "python":
+    #     rag_path_ext = ".py"
+    # elif selected_lang == "csharp":
+    #     rag_path_ext = ".cs"
+    rag_path_ext =  accepted_types
 
 elif file_format == "PDF":
     rag_path_ext = ".pdf"
@@ -152,7 +169,8 @@ elif file_format == "CSV":
     rag_path_ext = ".csv"
 
 
-uploaded_files = st.file_uploader(f"Upload a {rag_path_ext} file", type=rag_path_ext,accept_multiple_files=True,)
+
+uploaded_files = st.file_uploader(f"Upload files", type=rag_path_ext,accept_multiple_files=True,)
 
 
 st.sidebar.header("Groq API Key")
