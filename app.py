@@ -127,89 +127,133 @@ def process_csv_files(uploaded_files,query):
     return response
 
 
+def load_streamlit_ui() : 
+    # MAIN SCREEN
+    st.set_page_config(page_title="🦜LangChain - Q&A with RAG ", layout="wide")
+    st.header("🦜LangChain - Q&A with RAG ")
+    
 
-st.set_page_config(page_title="🦜LangChain - Q&A with RAG ", layout="wide")
-st.header("🦜LangChain - Q&A with RAG ")
+    # SIDEBAR
+    
+    user_input = {}
+    selected_model = ""
+    groq_api_key = ""
+
+    #st.sidebar.header("Groq API Key")
+    groq_api_key_input = st.sidebar.text_input("Enter Groq API Key", type="password")
+    if groq_api_key_input:
+        groq_api_key = groq_api_key_input  # Update placeholder with user-provided key
+        st.sidebar.header("Model Selection (if applicable)")
+        model_options = ["mixtral-8x7b-32768","llama3-8b-8192", "llama3-70b-8192"]  # Replace with your actual models
+        selected_model = st.sidebar.selectbox("Select Model:", model_options)
+
+    #st.sidebar.header("RAG Document Format")
+    file_format = st.sidebar.selectbox("Select Input Document Format:", ["Code Repo", "PDF", "CSV"])
+
+    # Check if the section exists
+    if not main_config.has_section('Supported_Extensions'):
+        raise ValueError("Section 'Supported_Extensions' not found in config.ini")
+
+    # Extract extensions from the config dictionary
+    extensions =  main_config['Supported_Extensions']['extensions']
+    supported_extensions = eval(extensions)
+    accepted_types = [f"{ext}" for ext in supported_extensions]
+
+    # Print the list of extensions
+    print(accepted_types)
+
+    if file_format == "Code Repo":
+        # st.sidebar.header("Select Language")
+        # lang_options = ["java", "python", "csharp"]  # Replace with your actual models
+        # selected_lang = st.sidebar.selectbox("Select Model:", lang_options)
+        # if selected_lang == "java":
+        #     rag_path_ext = ".java"
+        # elif selected_lang == "python":
+        #     rag_path_ext = ".py"
+        # elif selected_lang == "csharp":
+        #     rag_path_ext = ".cs"
+        rag_path_ext =  accepted_types
+
+    elif file_format == "PDF":
+        rag_path_ext = ".pdf"
+
+    elif file_format == "CSV":
+        rag_path_ext = ".csv"
 
 
-st.sidebar.header("Vector Stores Options")
-db_option = st.sidebar.selectbox("Select Vector DB:", ["Qdrant", "Chroma"])
 
-st.sidebar.header("RAG Document Format")
-file_format = st.sidebar.selectbox("Select Input Document Format:", ["Code Repo", "PDF", "CSV"])
+    uploaded_files = st.sidebar.file_uploader(f"Upload files", type=rag_path_ext,accept_multiple_files=True,)
 
-# Check if the section exists
-if not main_config.has_section('Supported_Extensions'):
-    raise ValueError("Section 'Supported_Extensions' not found in config.ini")
+    #st.sidebar.header("Vector Stores Options")
+    db_option = st.sidebar.selectbox("Select Vector DB:", ["Qdrant", "Chroma"])
 
-# Extract extensions from the config dictionary
-extensions =  main_config['Supported_Extensions']['extensions']
-supported_extensions = eval(extensions)
-accepted_types = [f"{ext}" for ext in supported_extensions]
-
-# Print the list of extensions
-print(accepted_types)
-
-if file_format == "Code Repo":
-    # st.sidebar.header("Select Language")
-    # lang_options = ["java", "python", "csharp"]  # Replace with your actual models
-    # selected_lang = st.sidebar.selectbox("Select Model:", lang_options)
-    # if selected_lang == "java":
-    #     rag_path_ext = ".java"
-    # elif selected_lang == "python":
-    #     rag_path_ext = ".py"
-    # elif selected_lang == "csharp":
-    #     rag_path_ext = ".cs"
-    rag_path_ext =  accepted_types
-
-elif file_format == "PDF":
-    rag_path_ext = ".pdf"
-
-elif file_format == "CSV":
-    rag_path_ext = ".csv"
+    process_files = st.sidebar.button("Process")
+    
+    user_input = {"process_files":process_files,"file_format":file_format,"uploaded_files":uploaded_files,"groq_api_key":groq_api_key,"selected_model":selected_model,"db_option":db_option}
+    
+    return user_input
 
 
-
-uploaded_files = st.file_uploader(f"Upload files", type=rag_path_ext,accept_multiple_files=True,)
-
-
-st.sidebar.header("Groq API Key")
-groq_api_key_input = st.sidebar.text_input("Enter Groq API Key (if applicable)", type="password")
-if groq_api_key_input:
-    groq_api_key = groq_api_key_input  # Update placeholder with user-provided key
-    st.sidebar.header("Model Selection (if applicable)")
-    model_options = ["mixtral-8x7b-32768","llama3-8b-8192", "llama3-70b-8192"]  # Replace with your actual models
-    selected_model = st.sidebar.selectbox("Select Model:", model_options)
-
-query = st.chat_input("Enter your query here")
-
-if query:
-    st.write(f"🧑‍💻: {query}")
-    try : 
-        result = ""
-        if file_format == "Code Repo":
-            if len(uploaded_files) > 0 :
-                repo_path = uploaded_files
+def user_query():
+    # ENTER QUERY
+    query = st.chat_input("Enter your query here")
+    return query
+    
+def process_files_for_vectorization(user_input,query):
+    # CHAT START
+    process_files = user_input["process_files"]
+    file_format = user_input["file_format"]
+    uploaded_files = user_input["uploaded_files"]
+    
+    
+    if query :
+        if process_files is None :
+            st.warning("Please Process the File ")
             
-            result = process_code_repo(main_config,db_option,repo_path,groq_api_key,selected_model, rag_path_ext,query)
+        else :
+            st.write(f"🧑‍💻: {query}")
+            try : 
+                result = ""
+                if file_format == "Code Repo":
+                    if len(uploaded_files) > 0 :
+                        repo_path = uploaded_files
+                    
+                    result = process_code_repo(main_config,db_option,repo_path,groq_api_key,selected_model, rag_path_ext,query)
 
-        elif file_format == "PDF":
-            if len(uploaded_files) > 0 :
-                repo_path = uploaded_files
-            result = process_pdf_files(main_config,db_option,repo_path,groq_api_key,selected_model, rag_path_ext,query)
-        elif file_format == "CSV":
-            result = process_csv_files(uploaded_files,query)
-        else:
-            st.error("Invalid format selected.")
+                elif file_format == "PDF":
+                    if len(uploaded_files) > 0 :
+                        repo_path = uploaded_files
+                    result = process_pdf_files(main_config,db_option,repo_path,groq_api_key,selected_model, rag_path_ext,query)
+                elif file_format == "CSV":
+                    result = process_csv_files(uploaded_files,query)
+                else:
+                    st.error("Invalid format selected.")
 
-        if result is not None:
-            st.write(f"🤖:{result}")
-            
-        else:
-            st.warning("Response is Empty")
+                if result is not None:
+                    st.write(f"🤖:{result}")
+                    
+                else:
+                    st.warning("Response is Empty")
 
-    except Exception as e:
-        st.warning(f"Internal Server Error : {e}")
+            except Exception as e:
+                st.warning(f"Internal Server Error : {e}")
+
+# START EXECUTION
+if __name__ == "__main__":
+    user_input = load_streamlit_ui()
+    query = user_query()
+    if query:
+        processed = process_files_for_vectorization(user_input,query)
+    
+    
+
+
+
+
+
+
+
+    
 
 st.sidebar.info("**Note:**")
 st.sidebar.write(
@@ -218,3 +262,6 @@ st.sidebar.write(
     "- Qdrant is used as In-Memory storage"
     "- Code repo file - https://github.com/Priyansh42/Lung-Cancer-Detection/blob/main/lcd_cnn.py"
 )
+
+
+
