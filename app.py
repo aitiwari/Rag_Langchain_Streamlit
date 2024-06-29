@@ -267,7 +267,7 @@ def has_empty_values(user_input):
   return any(empty_checks)
 
 
-def initiate_chat_with_LLM(query):
+def initiate_chat_with_LLM(query,groq_api_key):
     obj_llm_invoke = Groq(groq_api_key,selected_model)
     retriever = st.session_state["retriever"]
     if retriever == "":
@@ -301,7 +301,7 @@ if __name__ == "__main__":
     if  query :
         st.chat_message("human").write(f"{query}")
         response = ""
-        response = initiate_chat_with_LLM(user_input["selected_db"])
+        response = initiate_chat_with_LLM(user_input["selected_db"],user_input["groq_api_key"],)
         if response is not None:
             st.chat_message("assistant").write(f"{response}")
             
