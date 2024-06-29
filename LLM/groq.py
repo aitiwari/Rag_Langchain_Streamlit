@@ -50,6 +50,16 @@ class Groq:
         result = qa.invoke({"input": query})
         print(result)
         return result["answer"]
+    
+    
+    def llm_invoke_without_rag(self,query):
+        system = "You are a helpful assistant."
+        human = "{text}"
+        prompt = ChatPromptTemplate.from_messages([("system", system), ("human", human)])
+
+        chain = prompt | self.get_llm()
+        result = chain.invoke({"text": query})
+        return result.content
 
 
 
