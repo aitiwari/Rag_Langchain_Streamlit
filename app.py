@@ -283,11 +283,18 @@ if __name__ == "__main__":
             st.warning("Response is Empty")
             
     st.sidebar.info("**Note:**")
-    st.sidebar.markdown(
-        "- Replace placeholder groq API KEY by creating account https://console.groq.com/keys and select the model - default is mixtral"
-        "- Chroma Db storage in local and can be view the chunk storage "
-        "- Qdrant is used as In-Memory storage"
-        "- Code repo file - https://github.com/Priyansh42/Lung-Cancer-Detection/blob/main/lcd_cnn.py"
+    st.sidebar.markdown(  
+    """
+    ##### Replace placeholder groq API KEY by creating account https://console.groq.com/keys and select the model - default is mixtral,
+    ##### top K pulled chunks for similarity search or mmr search is 8 and chunks size is 2000 default 
+    ##### If API KEY is given and no documents are selected and Processed then Bot will be without RAG or may work with chat history
+    ##### Select Input format Doument for Code repo consist list of supported languages populated in browse files, PDF and CSV also supported
+    ##### Multiples files can be processed
+    ##### Qdrant, FAISS are used as In-Memory storage
+    ##### PINECONE reference for API KEY - https://app.pinecone.io/organizations/-NsMHuZ1r1rFqXuPpeXQ/projects/ebf4ca26-dfd1-4202-84fa-baaf3f87a473/keys , default index is vector
+    ##### Weaviate reference for API KEY - https://console.weaviate.cloud/apps/collections/20aee0d5-4473-4891-839b-8ca5c6dfa50e and default collection is langchain
+    ##### Neo4j Graph vector db reference - While creating account , credential will be downloaded with details
+    """
     )
 
 
