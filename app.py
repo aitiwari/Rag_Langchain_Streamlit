@@ -167,7 +167,7 @@ def load_streamlit_ui() :
 
     #st.sidebar.header("Vector Stores Options")
     #st.sidebar.divider() 
-    selected_db = st.sidebar.selectbox("Select Vector DB:", ["Qdrant", "Chroma","FAISS","Weaviate","Pinecone","Neo4j"])
+    selected_db = st.sidebar.selectbox("Select Vector DB:", ["Qdrant", "FAISS","Weaviate","Pinecone","Neo4j"])
     
     if selected_db =="Weaviate":        
         os.environ['WEAVIATE_API_KEY'] = st.sidebar.text_input("Enter the Weaviate API KEY",type="password")
