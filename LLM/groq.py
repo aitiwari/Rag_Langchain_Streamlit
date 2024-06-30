@@ -1,3 +1,5 @@
+import os
+import streamlit as st
 from langchain_groq import ChatGroq
 from langchain.chains import create_history_aware_retriever, create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
@@ -13,7 +15,13 @@ class Groq:
         self.selected_model = selected_model
 
     def get_llm(self):
-        llm = ChatGroq(groq_api_key =self.groq_api_key,model=self.selected_model )
+        try :
+            if self.groq_api_key=='' and os.environ["GROQ_API_KEY"] =='':
+                st.error("Please Enter the Groq API KEY")
+            llm = ChatGroq(groq_api_key =self.groq_api_key,model=self.selected_model )
+            
+        except Exception as e:
+            raise ValueError(f"Error Occurred with Exception : {e}")
         return llm
 
     def invoke_llm_with_history(self,retriever,query):
