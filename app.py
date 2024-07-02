@@ -121,8 +121,8 @@ def process_csv_files(uploaded_files,query):
         
 def load_streamlit_ui() : 
     # MAIN SCREEN
-    st.set_page_config(page_title="🦜LangChain - Q&A with RAG ", layout="wide")
-    st.header("🦜LangChain - Q&A with RAG ")
+    st.set_page_config(page_title="🦜LangChain update- Q&A with RAG ", layout="wide")
+    st.header("🦜LangChain LangChain  - Q&A with RAG ")
     # SIDEBAR
     user_input = {}
     selected_model = ""
