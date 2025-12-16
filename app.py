@@ -25,7 +25,7 @@ selected_db = "Qdrant"
 #repo part - can be taken from ui , as of now pointing to local
 repo_path = "./Rag_Documents/"
 groq_api_key = "gsk_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-selected_model = "mixtral-8x7b-32768"
+selected_model = "llama-3.3-70b-versatile"
 rag_path_ext = ".java"
 config_file_path = "./config.ini"
 #DEFAULT SELECTION PARAMS - END 
@@ -133,7 +133,7 @@ def load_streamlit_ui() :
     if groq_api_key_input:
         groq_api_key = groq_api_key_input  # Update placeholder with user-provided key
         #st.sidebar.header("Model Selection (if applicable)")
-        model_options = ["mixtral-8x7b-32768","llama3-8b-8192", "llama3-70b-8192","gemma-7b-it"]  # Replace with your actual models
+        model_options = ["llama-3.3-70b-versatile","llama3-8b-8192", "llama3-70b-8192","gemma-7b-it"]  # Replace with your actual models
         selected_model = st.sidebar.selectbox("Select Model:", model_options)
     #st.sidebar.divider() 
     #st.sidebar.header("RAG Document Format")
